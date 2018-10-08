@@ -23,7 +23,7 @@
     <parent>
         <groupId>io.helidon.microprofile.tests</groupId>
         <artifactId>tck-project</artifactId>
-        <version>0.10.1-SNAPSHOT</version>
+        <version>0.10.2-SNAPSHOT</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
@@ -63,6 +63,11 @@
             <groupId>org.eclipse.microprofile.health</groupId>
             <artifactId>microprofile-health-tck</artifactId>
             <version>${version.lib.microprofile-health-api}</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>javax.activation</groupId>
+            <artifactId>javax.activation-api</artifactId>
             <scope>test</scope>
         </dependency>
     </dependencies>

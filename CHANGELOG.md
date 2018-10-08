@@ -10,6 +10,20 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 
 ### Fixes
 
+## [0.10.1] - 2019-09-28
+
+### Improvements
+
+- Security: Jersey integration to use pre-matching filter for securing requests
+
+### Fixes
+
+- WebServer: RouteListRoutingRules post method has copy/paste errors
+- WebServer: Display friendly message if port is in use
+- WebServer: Set the option with SO_TIMEOUT with correct value from config
+- Build: Helidon 0.10.0 build failed in local system. 
+- Documentation: various updates
+
 ## [0.10.0] - 2018-09-14
 ### Notes
 

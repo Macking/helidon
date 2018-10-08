@@ -24,7 +24,7 @@
     <parent>
         <groupId>io.helidon.microprofile.tests</groupId>
         <artifactId>tck-project</artifactId>
-        <version>0.10.1-SNAPSHOT</version>
+        <version>0.10.2-SNAPSHOT</version>
     </parent>
     <artifactId>tck-metrics</artifactId>
     <name>Helidon Microprofile Tests TCK Metrics</name>
@@ -86,6 +86,11 @@
         <dependency>
             <groupId>org.slf4j</groupId>
             <artifactId>slf4j-simple</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>javax.activation</groupId>
+            <artifactId>javax.activation-api</artifactId>
             <scope>test</scope>
         </dependency>
     </dependencies>
