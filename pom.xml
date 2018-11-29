@@ -22,7 +22,7 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>io.helidon</groupId>
     <artifactId>helidon-project</artifactId>
-    <version>0.10.2-SNAPSHOT</version>
+    <version>0.11.0-SNAPSHOT</version>
     <packaging>pom</packaging>
 
     <name>Helidon Project</name>
@@ -81,8 +81,6 @@
     </scm>
 
     <properties>
-        <java.version>8</java.version>
-
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
 
@@ -115,11 +113,14 @@
         <version.lib.groovy-all>2.4.14</version.lib.groovy-all>
         <version.lib.grpc>1.11.0</version.lib.grpc>
         <version.lib.guava>25.0-jre</version.lib.guava>
+        <version.lib.h2>1.4.197</version.lib.h2>
         <version.lib.hamcrest>1.3</version.lib.hamcrest>
+        <version.lib.hikaricp>2.7.8</version.lib.hikaricp>
         <version.lib.jackson>2.9.4</version.lib.jackson>
         <version.lib.jandex>2.0.4.Final</version.lib.jandex>
         <version.lib.jaxb-api>2.3.0</version.lib.jaxb-api>
         <version.lib.jaxrs-api>2.1</version.lib.jaxrs-api>
+        <version.lib.jedis>2.9.0</version.lib.jedis>
         <version.lib.jersey>2.26</version.lib.jersey>
         <version.lib.jgit>4.9.0.201710071750-r</version.lib.jgit>
         <version.lib.jmh>1.19</version.lib.jmh>
@@ -133,7 +134,10 @@
         <version.lib.microprofile-metrics-api>1.1</version.lib.microprofile-metrics-api>
         <version.lib.microprofile-fault-tolerance-api>1.0</version.lib.microprofile-fault-tolerance-api>
         <version.lib.mockito>2.15.0</version.lib.mockito>
+        <version.lib.mysql-connector-java>8.0.11</version.lib.mysql-connector-java>
         <version.lib.netty>4.1.22.Final</version.lib.netty>
+        <version.lib.oci-java-sdk-objectstorage>1.2.44</version.lib.oci-java-sdk-objectstorage>
+        <version.lib.ojdbc8>12.2.0.1</version.lib.ojdbc8>
         <version.lib.opentracing>0.31.0</version.lib.opentracing>
         <version.lib.prometheus>0.4.0</version.lib.prometheus>
         <version.lib.protobuf.java>3.5.1</version.lib.protobuf.java>
@@ -175,10 +179,12 @@
         <version.plugin.license>1.16</version.plugin.license>
         <version.plugin.nexus-staging>1.6.7</version.plugin.nexus-staging>
         <version.plugin.os>1.5.0.Final</version.plugin.os>
+        <version.plugin.project-info-reports>3.0.0</version.plugin.project-info-reports>
         <version.plugin.protobuf>0.5.0</version.plugin.protobuf>
         <version.plugin.resources>2.7</version.plugin.resources>
         <version.plugin.scm-publish-plugin>3.0.0</version.plugin.scm-publish-plugin>
-        <version.plugin.sitegen>1.0.0</version.plugin.sitegen>
+        <version.plugin.site>3.7.1</version.plugin.site>
+        <version.plugin.sitegen>1.0.3</version.plugin.sitegen>
         <version.plugin.source>3.0.1</version.plugin.source>
         <version.plugin.spotbugs>3.1.3.1</version.plugin.spotbugs>
         <version.plugin.spotify-docker>1.0.0</version.plugin.spotify-docker>
@@ -207,8 +213,8 @@
                     <artifactId>maven-compiler-plugin</artifactId>
                     <version>${version.plugin.compiler}</version>
                     <configuration>
-                        <source>${java.version}</source>
-                        <target>${java.version}</target>
+                        <source>1.8</source>
+                        <target>1.8</target>
                         <compilerArgs>
                             <arg>-Xlint:unchecked</arg>
                         </compilerArgs>
@@ -219,16 +225,40 @@
                     <artifactId>maven-javadoc-plugin</artifactId>
                     <version>${version.plugin.javadoc}</version>
                     <configuration>
+                        <links>
+                            <link>http://docs.jboss.org/cdi/api/${version.lib.cdi-api}</link>
+                            <link>http://www.reactive-streams.org/reactive-streams-${version.lib.reactivestreams}-javadoc</link>
+                            <link>https://jax-rs.github.io/apidocs/${version.lib.jaxrs-api}</link>
+                            <link>https://jersey.github.io/apidocs/${version.lib.jersey}/jersey</link>
+                            <link>https://static.javadoc.io/com.typesafe/config/${version.lib.typesafe-config}</link>
+                            <link>https://static.javadoc.io/io.netty/netty-transport/${version.lib.netty}</link>
+                            <link>https://static.javadoc.io/io.opentracing/opentracing-api/${version.lib.opentracing}</link>
+                            <link>https://static.javadoc.io/io.prometheus/simpleclient/${version.lib.prometheus}</link>
+                            <link>https://static.javadoc.io/io.zipkin.reporter2/zipkin-reporter/${version.lib.zipkin}</link>
+                            <link>https://static.javadoc.io/javax.json/javax.json-api/${version.lib.jsonp-api}</link>
+                            <link>https://static.javadoc.io/org.eclipse.microprofile.config/microprofile-config-api/${version.lib.microprofile-config-api}</link>
+                            <link>https://static.javadoc.io/org.eclipse.microprofile.health/microprofile-health-api/${version.lib.microprofile-health-api}</link>
+                            <link>https://static.javadoc.io/org.eclipse.microprofile.metrics/microprofile-metrics-api/${version.lib.microprofile-metrics-api}</link>
+                        </links>
                         <doclint>all</doclint>
-                        <additionalJOptions>
-                            <JOption>-source</JOption>
-                            <JOption>8</JOption>
+                        <additionalJOptions combine.children="append">
+                            <JOption>-J-Dhttp.agent=maven-javadoc-plugin</JOption>
                         </additionalJOptions>
                         <sourceFileExcludes>
                             <sourceFileExclude>**/module-info.java</sourceFileExclude>
                             <sourceFileExclude>target/**/*.java</sourceFileExclude>
                         </sourceFileExcludes>
                     </configuration>
+                </plugin>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-project-info-reports-plugin</artifactId>
+                    <version>${version.plugin.project-info-reports}</version>
+                </plugin>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-site-plugin</artifactId>
+                    <version>${version.plugin.site}</version>
                 </plugin>
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
@@ -605,6 +635,11 @@
                 <artifactId>netty-codec-http</artifactId>
                 <version>${version.lib.netty}</version>
             </dependency>
+            <dependency>
+                <groupId>io.netty</groupId>
+                <artifactId>netty-codec-http2</artifactId>
+                <version>${version.lib.netty}</version>
+            </dependency>
 
             <!-- Config related -->
             <dependency>
@@ -796,6 +831,11 @@
                 <version>${version.lib.microprofile-fault-tolerance-api}</version>
             </dependency>
             <dependency>
+                <groupId>org.eclipse.microprofile.fault-tolerance</groupId>
+                <artifactId>microprofile-fault-tolerance-tck</artifactId>
+                <version>${version.lib.microprofile-fault-tolerance-api}</version>
+            </dependency>
+            <dependency>
                 <groupId>com.netflix.hystrix</groupId>
                 <artifactId>hystrix-core</artifactId>
                 <version>${version.lib.hystrix}</version>
@@ -876,6 +916,42 @@
                 </exclusions>
             </dependency>
 
+            <!-- Integrations related -->
+            <dependency>
+                <groupId>com.h2database</groupId>
+                <artifactId>h2</artifactId>
+                <version>${version.lib.h2}</version>
+            </dependency>
+            <!--
+                See http://docs.oracle.com/middleware/1213/core/MAVEN/config_maven_repo.htm#MAVEN9010
+            -->
+            <dependency>
+                <groupId>com.oracle.jdbc</groupId>
+                <artifactId>ojdbc8</artifactId>
+                <version>${version.lib.ojdbc8}</version>
+            </dependency>
+            <dependency>
+                <groupId>mysql</groupId>
+                <artifactId>mysql-connector-java</artifactId>
+                <version>${version.lib.mysql-connector-java}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.oracle.oci.sdk</groupId>
+                <artifactId>oci-java-sdk-objectstorage</artifactId>
+                <version>${version.lib.oci-java-sdk-objectstorage}</version>
+                <type>pom</type>
+            </dependency>
+            <dependency>
+                <groupId>com.zaxxer</groupId>
+                <artifactId>HikariCP</artifactId>
+                <version>${version.lib.hikaricp}</version>
+            </dependency>
+            <dependency>
+                <groupId>redis.clients</groupId>
+                <artifactId>jedis</artifactId>
+                <version>${version.lib.jedis}</version>
+            </dependency>
+
             <!-- Testing libraries -->
             <dependency>
                 <groupId>org.mockito</groupId>
@@ -933,6 +1009,64 @@
             </modules>
         </profile>
         <profile>
+            <id>integrations</id>
+            <modules>
+                <module>integrations</module>
+            </modules>
+        </profile>
+        <profile>
+          <id>jdk9-javadoc</id>
+          <!-- https://maven.apache.org/guides/introduction/introduction-to-profiles.html#Details_on_profile_activation -->
+          <!-- AND semantics; see https://issues.apache.org/jira/browse/MNG-4565 -->
+            <activation> 
+              <jdk>[9,10)</jdk>
+              <property>
+                  <name>!jdkToolchainVersion</name>
+              </property>
+            </activation>
+            <build>
+                <pluginManagement>
+                    <plugins>
+                        <plugin>
+                            <groupId>org.apache.maven.plugins</groupId>
+                            <artifactId>maven-javadoc-plugin</artifactId>
+                            <configuration>
+                                <additionalJOptions>
+                                    <!-- https://bugs.openjdk.java.net/browse/JDK-8184969 -->
+                                    <JOption>-Xold</JOption>
+                                </additionalJOptions>
+                            </configuration>
+                        </plugin>
+                    </plugins>
+                </pluginManagement>
+            </build>
+        </profile>
+        <profile>
+          <id>jdk9-toolchain-javadoc</id>
+            <activation>
+              <property>
+                <name>jdkToolchainVersion</name>
+                <value>9</value>
+              </property>
+            </activation>
+            <build>
+                <pluginManagement>
+                    <plugins>
+                        <plugin>
+                            <groupId>org.apache.maven.plugins</groupId>
+                            <artifactId>maven-javadoc-plugin</artifactId>
+                            <configuration>
+                                <additionalJOptions combine.children="append">
+                                    <!-- https://bugs.openjdk.java.net/browse/JDK-8184969 -->
+                                    <JOption>-Xold</JOption>
+                                </additionalJOptions>
+                            </configuration>
+                        </plugin>
+                    </plugins>
+                </pluginManagement>
+            </build>
+        </profile>
+        <profile>
             <id>jdk9+</id>
             <activation>
                 <jdk>[9,)</jdk>
@@ -945,7 +1079,7 @@
                             <groupId>org.apache.maven.plugins</groupId>
                             <artifactId>maven-compiler-plugin</artifactId>
                             <executions>
-                                <!-- fist pass, compile everything for java9 -->
+                                <!-- first pass, compile everything for java9 -->
                                 <execution>
                                     <id>default-compile</id>
                                     <configuration>
@@ -966,7 +1100,7 @@
                                         <goal>compile</goal>
                                     </goals>
                                     <configuration>
-                                        <release>${java.version}</release>
+                                        <release>8</release>
                                     </configuration>
                                 </execution>
                                 <execution>
@@ -975,7 +1109,7 @@
                                         <goal>testCompile</goal>
                                     </goals>
                                     <configuration>
-                                        <release>${java.version}</release>
+                                        <release>8</release>
                                     </configuration>
                                 </execution>
                             </executions>
@@ -1288,7 +1422,7 @@
                 </file>
             </activation>
             <properties>
-                <jdkToolchainVersion>${maven.compiler.target}</jdkToolchainVersion>
+                <jdkToolchainVersion>${java.vm.specification.version}</jdkToolchainVersion>
             </properties>
             <build>
                 <plugins>
