@@ -37,9 +37,9 @@ public class SecureConfigFromConfigTest extends AbstractSecureConfigTest {
         config = Config.create();
 
         configRequiresEncryption = Config.builder()
-                .sources(ConfigSources.from(
+                .sources(ConfigSources.create(
                         //override require encryption
-                        ConfigSources.from(mapOf(ConfigProperties.REQUIRE_ENCRYPTION_CONFIG_KEY, "true")),
+                        ConfigSources.create(mapOf(ConfigProperties.REQUIRE_ENCRYPTION_CONFIG_KEY, "true")),
                         ConfigSources.classpath("application.yaml")))
                 .build();
 
@@ -62,11 +62,11 @@ public class SecureConfigFromConfigTest extends AbstractSecureConfigTest {
         // these are expected not decrypted, as master password was not provided!
         testPassword(getConfigRequiresEncryption(),
                      "pwd4",
-                     "${AES=YbaZGjQfwOv0htF2nmRYaOMYp0+qY/IRQUlWHfRKeTw6Q2uy33Rp8ZhTwv0oDywE}",
-                     "symmetric");
+                     "${AES=YbaZGjQfwOv0htF2nmRYaOMYp0+qY/IRQUlWHfRKeTw6Q2uy33Rp8ZhTwv0oDywE}"
+        );
         testPassword(getConfigRequiresEncryption(),
                      "pwd6",
-                     "${AES=D/UgMzsNb265HU1NDvdzm7tACHdsW6u1PjYEcRkV/OLiWcI+ET6Q4MKCz0zHyEh9}",
-                     "symmetric");
+                     "${AES=D/UgMzsNb265HU1NDvdzm7tACHdsW6u1PjYEcRkV/OLiWcI+ET6Q4MKCz0zHyEh9}"
+        );
     }
 }

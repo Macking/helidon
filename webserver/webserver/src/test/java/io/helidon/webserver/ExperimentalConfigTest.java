@@ -50,11 +50,11 @@ public class ExperimentalConfigTest {
 
     @Test
     public void configResource() {
-        Config http2 = Config.from(ConfigSources.classpath("experimental/application.yaml"))
+        Config http2 = Config.create(ConfigSources.classpath("experimental/application.yaml"))
                 .get("webserver")
                 .get("experimental")
                 .get("http2");
-        assertTrue(http2.get("enable").as(Boolean.class));
-        assertEquals(16 * 1024, (int) http2.get("max-content-length").as(Integer.class));
+        assertTrue(http2.get("enable").asBoolean().get());
+        assertEquals(16 * 1024, (int) http2.get("max-content-length").asInt().get());
     }
 }
