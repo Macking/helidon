@@ -24,7 +24,7 @@
     <parent>
         <groupId>io.helidon.microprofile.bundles</groupId>
         <artifactId>bundles-project</artifactId>
-        <version>0.10.2-SNAPSHOT</version>
+        <version>0.11.0-SNAPSHOT</version>
     </parent>
     <artifactId>helidon-microprofile-1.2</artifactId>
     <name>Helidon Microprofile Bundles 1.2</name>
@@ -50,13 +50,15 @@
             <artifactId>helidon-microprofile-metrics-cdi</artifactId>
             <version>${project.version}</version>
         </dependency>
-        <!--<dependency>-->
-        <!--<groupId>io.helidon.microprofile.fault-tolerance</groupId>-->
-        <!--<artifactId>helidon-microprofile-fault-tolerance-cdi</artifactId>-->
-        <!--</dependency>-->
-        <!--<dependency>-->
-        <!--<groupId>io.helidon.microprofile.security</groupId>-->
-        <!--<artifactId>helidon-microprofile-security-jwt</artifactId>-->
-        <!--</dependency>-->
+        <dependency>
+            <groupId>io.helidon.microprofile</groupId>
+            <artifactId>helidon-microprofile-fault-tolerance</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>io.helidon.microprofile.jwt</groupId>
+            <artifactId>helidon-microprofile-jwt-auth-cdi</artifactId>
+            <version>${project.version}</version>
+        </dependency>
     </dependencies>
 </project>

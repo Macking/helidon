@@ -24,7 +24,7 @@
     <parent>
         <groupId>io.helidon.security</groupId>
         <artifactId>helidon-security-providers-project</artifactId>
-        <version>0.10.2-SNAPSHOT</version>
+        <version>0.11.0-SNAPSHOT</version>
     </parent>
     <artifactId>helidon-security-provider-jwt</artifactId>
     <name>Helidon Security Providers JWT</name>
@@ -50,8 +50,8 @@
             <version>${project.version}</version>
         </dependency>
         <dependency>
-            <groupId>io.helidon.config</groupId>
-            <artifactId>helidon-config-bundle</artifactId>
+            <groupId>io.helidon.bundles</groupId>
+            <artifactId>helidon-bundles-config</artifactId>
             <version>${project.version}</version>
             <scope>test</scope>
         </dependency>

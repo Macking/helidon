@@ -24,7 +24,7 @@
     <parent>
         <groupId>io.helidon</groupId>
         <artifactId>helidon-project</artifactId>
-        <version>0.10.2-SNAPSHOT</version>
+        <version>0.11.0-SNAPSHOT</version>
     </parent>
     <groupId>io.helidon.config</groupId>
     <artifactId>helidon-config-project</artifactId>
@@ -37,12 +37,11 @@
 
     <modules>
         <module>config</module>
+        <module>object-mapping</module>
         <module>yaml</module>
         <module>etcd</module>
         <module>git</module>
         <module>hocon</module>
-        <module>bundle</module>
-        <module>examples</module>
         <module>testing</module>
         <module>test-infrastructure</module>
         <module>tests</module>

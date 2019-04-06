@@ -23,7 +23,7 @@
     <parent>
         <groupId>io.helidon</groupId>
         <artifactId>helidon-project</artifactId>
-        <version>0.10.2-SNAPSHOT</version>
+        <version>0.11.0-SNAPSHOT</version>
     </parent>
     <artifactId>helidon-bom</artifactId>
     <packaging>pom</packaging>
@@ -58,6 +58,7 @@
                 <version>${project.version}</version>
             </dependency>
             <dependency>
+                <!-- TO BE REMOVED - deprecated -->
                 <groupId>io.helidon.webserver</groupId>
                 <artifactId>helidon-webserver-zipkin</artifactId>
                 <version>${project.version}</version>
@@ -79,8 +80,8 @@
             </dependency>
             <!-- config -->
             <dependency>
-                <groupId>io.helidon.config</groupId>
-                <artifactId>helidon-config-bundle</artifactId>
+                <groupId>io.helidon.bundles</groupId>
+                <artifactId>helidon-bundles-config</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
@@ -252,6 +253,18 @@
                 <version>${project.version}</version>
             </dependency>
 
+            <!-- jwt -->
+            <dependency>
+                <groupId>io.helidon.microprofile.jwt</groupId>
+                <artifactId>helidon-microprofile-jwt-auth</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>io.helidon.microprofile.jwt</groupId>
+                <artifactId>helidon-microprofile-jwt-auth-cdi</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+
             <!-- common -->
             <dependency>
                 <groupId>io.helidon.common</groupId>
@@ -271,6 +284,90 @@
             <dependency>
                 <groupId>io.helidon.common</groupId>
                 <artifactId>helidon-common-key-util</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+
+            <!-- tracing -->
+            <dependency>
+                <!-- to add tracer builder -->
+                <groupId>io.helidon.tracing</groupId>
+                <artifactId>helidon-tracing</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <!-- to add zipkin support -->
+                <groupId>io.helidon.tracing</groupId>
+                <artifactId>helidon-tracing-zipkin</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <!-- Client support -->
+                <groupId>io.helidon.tracing</groupId>
+                <artifactId>helidon-tracing-jersey-client</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <!-- Server support -->
+                <groupId>io.helidon.tracing</groupId>
+                <artifactId>helidon-tracing-jersey</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <!-- MP extension -->
+                <groupId>io.helidon.microprofile.tracing</groupId>
+                <artifactId>helidon-microprofile-tracing</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+
+            <!-- integrations -->
+            <dependency>
+                <groupId>io.helidon.serviceconfiguration</groupId>
+                <artifactId>helidon-serviceconfiguration-api</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>io.helidon.serviceconfiguration</groupId>
+                <artifactId>helidon-serviceconfiguration-config-source</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>io.helidon.serviceconfiguration</groupId>
+                <artifactId>helidon-serviceconfiguration-hikaricp-accs</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>io.helidon.serviceconfiguration</groupId>
+                <artifactId>helidon-serviceconfiguration-hikaricp-localhost</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>io.helidon.serviceconfiguration</groupId>
+                <artifactId>helidon-serviceconfiguration-hikaricp</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>io.helidon.serviceconfiguration</groupId>
+                <artifactId>helidon-serviceconfiguration-system-kubernetes</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>io.helidon.serviceconfiguration</groupId>
+                <artifactId>helidon-serviceconfiguration-system-oracle-accs</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>io.helidon.integrations.cdi</groupId>
+                <artifactId>helidon-integrations-cdi-datasource-hikaricp</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>io.helidon.integrations.cdi</groupId>
+                <artifactId>helidon-integrations-cdi-jedis</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>io.helidon.integrations.cdi</groupId>
+                <artifactId>helidon-integrations-cdi-oci-objectstorage</artifactId>
                 <version>${project.version}</version>
             </dependency>
         </dependencies>

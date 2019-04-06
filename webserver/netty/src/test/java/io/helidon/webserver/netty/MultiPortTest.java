@@ -109,7 +109,7 @@ public class MultiPortTest {
         };
 
         ssl = SSLContextBuilder.create(KeyConfig.keystoreBuilder()
-                                                 .keystore(Resource.from("ssl/certificate.p12"))
+                                                 .keystore(Resource.create("ssl/certificate.p12"))
                                                  .keystorePassphrase(new char[] {'h', 'e', 'l', 'i', 'd', 'o', 'n'})
                                                  .build())
                                .build();
@@ -273,7 +273,7 @@ public class MultiPortTest {
 
     @Test
     public void compositeFromConfig() throws Exception {
-        Config config = Config.from(ConfigSources.classpath("multiport/application.yaml"));
+        Config config = Config.create(ConfigSources.classpath("multiport/application.yaml"));
         webServer = WebServer.builder(Routing.builder()
                                              .get("/", (req, res) -> res.send("Plain!")))
                              .configuration(ServerConfiguration.fromConfig(config.get("webserver")))

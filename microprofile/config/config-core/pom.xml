@@ -24,7 +24,7 @@
     <parent>
         <groupId>io.helidon.microprofile.config</groupId>
         <artifactId>helidon-microprofile-config-project</artifactId>
-        <version>0.10.2-SNAPSHOT</version>
+        <version>0.11.0-SNAPSHOT</version>
     </parent>
     <artifactId>helidon-microprofile-config</artifactId>
     <name>Helidon Microprofile Config Core</name>
@@ -39,8 +39,8 @@
             <artifactId>microprofile-config-api</artifactId>
         </dependency>
         <dependency>
-            <groupId>io.helidon.config</groupId>
-            <artifactId>helidon-config-bundle</artifactId>
+            <groupId>io.helidon.bundles</groupId>
+            <artifactId>helidon-bundles-config</artifactId>
             <version>${project.version}</version>
         </dependency>
         <dependency>

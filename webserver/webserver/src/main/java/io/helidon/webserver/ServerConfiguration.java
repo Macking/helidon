@@ -165,6 +165,13 @@ public interface ServerConfiguration extends SocketConfiguration {
     Tracer tracer();
 
     /**
+     * Returns an {@link ExperimentalConfiguration}.
+     *
+     * @return Experimental configuration.
+     */
+    ExperimentalConfiguration experimental();
+
+    /**
      * Creates new instance with defaults from external configuration source.
      *
      * @param config the externalized configuration
@@ -203,6 +210,7 @@ public interface ServerConfiguration extends SocketConfiguration {
 
         private int workers;
         private Tracer tracer;
+        private ExperimentalConfiguration experimental;
 
         private Builder() {
         }
@@ -310,8 +318,8 @@ public interface ServerConfiguration extends SocketConfiguration {
         public Builder addSocket(String name, int port, InetAddress bindAddress) {
             Objects.requireNonNull(name, "Parameter 'name' must not be null!");
             return addSocket(name, SocketConfiguration.builder()
-                                                      .port(port)
-                                                      .bindAddress(bindAddress));
+                    .port(port)
+                    .bindAddress(bindAddress));
         }
 
         /**
@@ -385,6 +393,11 @@ public interface ServerConfiguration extends SocketConfiguration {
             return this;
         }
 
+        public Builder experimental(ExperimentalConfiguration experimental) {
+            this.experimental = experimental;
+            return this;
+        }
+
         private InetAddress string2InetAddress(String address) {
             try {
                 return InetAddress.getByName(address);
@@ -410,15 +423,29 @@ public interface ServerConfiguration extends SocketConfiguration {
             }
             configureSocket(config, defaultSocketBuilder);
 
-            config.get("workers").asOptionalInt().ifPresent(this::workersCount);
+            config.get("workers").asInt().ifPresent(this::workersCount);
 
             // sockets
             Config socketsConfig = config.get("sockets");
             if (socketsConfig.exists()) {
-                for (Config socketConfig : socketsConfig.asNodeList(CollectionsHelper.listOf())) {
+                for (Config socketConfig : socketsConfig.asNodeList().orElse(CollectionsHelper.listOf())) {
                     String socketName = socketConfig.name();
                     sockets.put(socketName, configureSocket(socketConfig, SocketConfiguration.builder()).build());
                 }
+            }
+
+            // experimental
+            Config experimentalConfig = config.get("experimental");
+            if (experimentalConfig.exists()) {
+                ExperimentalConfiguration.Builder experimentalBuilder = new ExperimentalConfiguration.Builder();
+                Config http2Config = experimentalConfig.get("http2");
+                if (http2Config.exists()) {
+                    Http2Configuration.Builder http2Builder = new Http2Configuration.Builder();
+                    http2Config.get("enable").asBoolean().ifPresent(http2Builder::enable);
+                    http2Config.get("maxContentLength").asInt().ifPresent(http2Builder::maxContentLength);
+                    experimentalBuilder.http2(http2Builder.build());
+                }
+                experimental = experimentalBuilder.build();
             }
 
             return this;
@@ -426,12 +453,14 @@ public interface ServerConfiguration extends SocketConfiguration {
 
         private SocketConfiguration.Builder configureSocket(Config config, SocketConfiguration.Builder soConfigBuilder) {
 
-            config.get("port").asOptionalInt().ifPresent(soConfigBuilder::port);
-            config.get("bind-address").asOptional(String.class).map(this::string2InetAddress)
-                  .ifPresent(soConfigBuilder::bindAddress);
-            config.get("backlog").asOptionalInt().ifPresent(soConfigBuilder::backlog);
-            config.get("timeout").asOptionalInt().ifPresent(soConfigBuilder::timeoutMillis);
-            config.get("receive-buffer").asOptionalInt().ifPresent(soConfigBuilder::receiveBufferSize);
+            config.get("port").asInt().ifPresent(soConfigBuilder::port);
+            config.get("bind-address")
+                    .asString()
+                    .map(this::string2InetAddress)
+                    .ifPresent(soConfigBuilder::bindAddress);
+            config.get("backlog").asInt().ifPresent(soConfigBuilder::backlog);
+            config.get("timeout").asInt().ifPresent(soConfigBuilder::timeoutMillis);
+            config.get("receive-buffer").asInt().ifPresent(soConfigBuilder::receiveBufferSize);
 
             // ssl
             Config sslConfig = config.get("ssl");
@@ -453,7 +482,7 @@ public interface ServerConfiguration extends SocketConfiguration {
          */
         @Override
         public ServerConfiguration build() {
-            return new ServerBasicConfig(defaultSocketBuilder.build(), workers, tracer, sockets);
+            return new ServerBasicConfig(defaultSocketBuilder.build(), workers, tracer, sockets, experimental);
         }
     }
 }

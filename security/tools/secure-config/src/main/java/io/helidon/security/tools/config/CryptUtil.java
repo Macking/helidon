@@ -37,6 +37,7 @@ import io.helidon.common.OptionalHelper;
 import io.helidon.common.configurable.Resource;
 import io.helidon.common.pki.KeyConfig;
 import io.helidon.config.Config;
+import io.helidon.config.ConfigValue;
 
 /**
  * Encryption utilities for secrets protection.
@@ -199,7 +200,7 @@ public final class CryptUtil {
     static Optional<char[]> resolveMasterPassword(boolean requireEncryption, Config config) {
         Optional<char[]> result = OptionalHelper.from(getEnv(ConfigProperties.MASTER_PASSWORD_ENV_VARIABLE))
                 .or(() -> {
-                    Optional<String> value = config.get(ConfigProperties.MASTER_PASSWORD_CONFIG_KEY).value();
+                    ConfigValue<String> value = config.get(ConfigProperties.MASTER_PASSWORD_CONFIG_KEY).asString();
                     if (value.isPresent()) {
                         if (requireEncryption) {
                             LOGGER.warning(
@@ -208,7 +209,7 @@ public final class CryptUtil {
                             return Optional.empty();
                         }
                     }
-                    return value;
+                    return value.asOptional();
                 })
                 .asOptional()
                 .map(String::toCharArray);
@@ -222,12 +223,12 @@ public final class CryptUtil {
 
     static Optional<PrivateKey> resolvePrivateKey(Config config) {
         // load configuration values
-        KeyConfig.PemBuilder pemBuilder = KeyConfig.pemBuilder().from(config);
-        KeyConfig.KeystoreBuilder keystoreBuilder = KeyConfig.keystoreBuilder().from(config);
+        KeyConfig.PemBuilder pemBuilder = KeyConfig.pemBuilder().config(config);
+        KeyConfig.KeystoreBuilder keystoreBuilder = KeyConfig.keystoreBuilder().config(config);
 
         getEnv(ConfigProperties.PRIVATE_KEY_PEM_PATH_ENV_VARIABLE)
                 .map(Paths::get)
-                .ifPresent(path -> pemBuilder.key(Resource.from(path)));
+                .ifPresent(path -> pemBuilder.key(Resource.create(path)));
 
         getEnv(ConfigProperties.PRIVATE_KEY_PASS_ENV_VARIABLE)
                 .map(String::toCharArray)
@@ -236,7 +237,7 @@ public final class CryptUtil {
         // override the ones defined in environment variables
         getEnv(ConfigProperties.PRIVATE_KEYSTORE_PATH_ENV_VARIABLE)
                 .map(Paths::get)
-                .ifPresent(path -> keystoreBuilder.keystore(Resource.from(path)));
+                .ifPresent(path -> keystoreBuilder.keystore(Resource.create(path)));
 
         getEnv(ConfigProperties.PRIVATE_KEYSTORE_TYPE_ENV_VARIABLE)
                 .ifPresent(keystoreBuilder::keystoreType);
@@ -256,7 +257,7 @@ public final class CryptUtil {
                 .updateWith(pemBuilder)
                 .updateWith(keystoreBuilder)
                 .build()
-                .getPrivateKey();
+                .privateKey();
 
         if (!result.isPresent()) {
             LOGGER.fine("Securing properties using asymmetric cipher is not available, as private key is not configured");

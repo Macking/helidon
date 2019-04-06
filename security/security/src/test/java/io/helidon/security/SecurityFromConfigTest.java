@@ -45,7 +45,7 @@ public class SecurityFromConfigTest {
     }
 
     @Test
-    public void testSecurityProviderAuthn() throws ExecutionException, InterruptedException {
+    public void testSecurityProviderAuthn() {
         SecurityContext context = security.contextBuilder("unitTest").build();
 
         assertThat(context.isAuthenticated(), is(false));
@@ -59,7 +59,7 @@ public class SecurityFromConfigTest {
 
         context.setEnv(envBuilder);
 
-        AuthenticationResponse authenticate = context.atnClientBuilder().get();
+        AuthenticationResponse authenticate = context.atnClientBuilder().buildAndGet();
 
         // current thread should have the correct subject
         assertThat(authenticate.getUser(), is(Optional.of(SecurityTest.SYSTEM)));
@@ -84,12 +84,12 @@ public class SecurityFromConfigTest {
 
         context.setEnv(envBuilder.addAttribute("resourceType", "SECOND_DENY"));
         // default authorizationClient
-        AuthorizationResponse response = context.atzClientBuilder().get();
+        AuthorizationResponse response = context.atzClientBuilder().buildAndGet();
 
         assertThat(response.getStatus().isSuccess(), is(false));
 
         context.setEnv(envBuilder.addAttribute("resourceType", "PERMIT"));
-        response = context.atzClientBuilder().get();
+        response = context.atzClientBuilder().buildAndGet();
 
         assertThat(response.getStatus().isSuccess(), is(true));
 
@@ -97,14 +97,14 @@ public class SecurityFromConfigTest {
         // non-default authorizationClient
         response = context.atzClientBuilder()
                 .explicitProvider("FirstInstance")
-                .get();
+                .buildAndGet();
 
         assertThat(response.getStatus().isSuccess(), is(false));
 
         context.setEnv(envBuilder.addAttribute("resourceType", "SECOND_DENY"));
         response = context.atzClientBuilder()
                 .explicitProvider("FirstInstance")
-                .get();
+                .buildAndGet();
 
         assertThat(response.getStatus().isSuccess(), is(true));
     }

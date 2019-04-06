@@ -635,7 +635,7 @@ public final class OidcConfig {
                                                  null);
                     if (null != jwkUri) {
                         this.signJwk = JwkKeys.builder()
-                                .resource(Resource.from(jwkUri))
+                                .resource(Resource.create(jwkUri))
                                 .build();
                     }
                 }
@@ -698,7 +698,7 @@ public final class OidcConfig {
             if ((null == oidcMetadata) && oidcMetadataWellKnown) {
                 try {
                     String wellKnown = identityUri + OidcConfig.DEFAULT_OIDC_METADATA_URI;
-                    oidcMetadata = Json.createReader(Resource.from(URI.create(wellKnown)).getStream()).readObject();
+                    oidcMetadata = Json.createReader(Resource.create(URI.create(wellKnown)).stream()).readObject();
                     LOGGER.finest(() -> "OIDC Metadata loaded from well known URI: " + wellKnown);
                 } catch (Exception e) {
                     collector.fatal(e, "Failed to load metadata: " + e.getClass().getName() + ": " + e.getMessage());
@@ -714,48 +714,50 @@ public final class OidcConfig {
          */
         public Builder config(Config config) {
             // mandatory configuration
-            config.get("client-id").value().ifPresent(this::clientId);
-            config.get("client-secret").value().ifPresent(this::clientSecret);
-            config.get("identity-uri").asOptional(URI.class).ifPresent(this::identityUri);
-            config.get("frontend-uri").value().ifPresent(this::frontendUri);
+            config.get("client-id").asString().ifPresent(this::clientId);
+            config.get("client-secret").asString().ifPresent(this::clientSecret);
+            config.get("identity-uri").as(URI.class).ifPresent(this::identityUri);
+            config.get("frontend-uri").asString().ifPresent(this::frontendUri);
 
             // environment
-            config.get("proxy-protocol").value().ifPresent(this::proxyProtocol);
-            config.get("proxy-host").value().ifPresent(this::proxyHost);
-            config.get("proxy-port").asOptionalInt().ifPresent(this::proxyPort);
+            config.get("proxy-protocol")
+                    .asString()
+                    .ifPresent(this::proxyProtocol);
+            config.get("proxy-host").asString().ifPresent(this::proxyHost);
+            config.get("proxy-port").asInt().ifPresent(this::proxyPort);
 
             // our application
-            config.get("redirect-uri").value().ifPresent(this::redirectUri);
-            config.get("scope-audience").value().ifPresent(this::scopeAudience);
+            config.get("redirect-uri").asString().ifPresent(this::redirectUri);
+            config.get("scope-audience").asString().ifPresent(this::scopeAudience);
 
             // token handling
-            config.get("cookie-use").asOptionalBoolean().ifPresent(this::useCookie);
-            config.get("cookie-name").value().ifPresent(this::cookieName);
-            config.get("cookie-domain").value().ifPresent(this::cookieDomain);
-            config.get("cookie-path").value().ifPresent(this::cookiePath);
-            config.get("cookie-max-age-seconds").asOptionalLong().ifPresent(this::cookieMaxAgeSeconds);
-            config.get("cookie-http-only").asOptionalBoolean().ifPresent(this::cookieHttpOnly);
-            config.get("cookie-secure").asOptionalBoolean().ifPresent(this::cookieSecure);
-            config.get("cookie-same-site").value().ifPresent(this::cookieSameSite);
-            config.get("query-param-use").asOptionalBoolean().ifPresent(this::useParam);
-            config.get("query-param-name").value().ifPresent(this::paramName);
-            config.get("header-use").asOptionalBoolean().ifPresent(this::useHeader);
-            config.get("header-token").asOptional(TokenHandler.class).ifPresent(this::headerTokenHandler);
+            config.get("cookie-use").asBoolean().ifPresent(this::useCookie);
+            config.get("cookie-name").asString().ifPresent(this::cookieName);
+            config.get("cookie-domain").asString().ifPresent(this::cookieDomain);
+            config.get("cookie-path").asString().ifPresent(this::cookiePath);
+            config.get("cookie-max-age-seconds").asLong().ifPresent(this::cookieMaxAgeSeconds);
+            config.get("cookie-http-only").asBoolean().ifPresent(this::cookieHttpOnly);
+            config.get("cookie-secure").asBoolean().ifPresent(this::cookieSecure);
+            config.get("cookie-same-site").asString().ifPresent(this::cookieSameSite);
+            config.get("query-param-use").asBoolean().ifPresent(this::useParam);
+            config.get("query-param-name").asString().ifPresent(this::paramName);
+            config.get("header-use").asBoolean().ifPresent(this::useHeader);
+            config.get("header-token").as(TokenHandler.class).ifPresent(this::headerTokenHandler);
 
             // OIDC server configuration
-            config.get("base-scopes").value().ifPresent(this::baseScopes);
-            Resource.from(config, "oidc-metadata").ifPresent(this::oidcMetadata);
-            config.get("oidc-metadata-well-known").asOptionalBoolean().ifPresent(this::oidcMetadataWellKnown);
-            Resource.from(config, "sign-jwk").ifPresent(this::signJwk);
-            config.get("token-endpoint-uri").asOptional(URI.class).ifPresent(this::tokenEndpointUri);
-            config.get("authorization-endpoint-uri").asOptional(URI.class).ifPresent(this::authorizationEndpointUri);
+            config.get("base-scopes").asString().ifPresent(this::baseScopes);
+            Resource.create(config, "oidc-metadata").ifPresent(this::oidcMetadata);
+            config.get("oidc-metadata-well-known").asBoolean().ifPresent(this::oidcMetadataWellKnown);
+            Resource.create(config, "sign-jwk").ifPresent(this::signJwk);
+            config.get("token-endpoint-uri").as(URI.class).ifPresent(this::tokenEndpointUri);
+            config.get("authorization-endpoint-uri").as(URI.class).ifPresent(this::authorizationEndpointUri);
 
-            config.get("introspect-endpoint-uri").asOptional(URI.class).ifPresent(this::introspectEndpointUri);
-            config.get("validate-with-jwk").asOptionalBoolean().ifPresent(this::validateJwtWithJwk);
-            config.get("issuer").value().ifPresent(this::issuer);
-            config.get("audience").value().ifPresent(this::audience);
+            config.get("introspect-endpoint-uri").as(URI.class).ifPresent(this::introspectEndpointUri);
+            config.get("validate-with-jwk").asBoolean().ifPresent(this::validateJwtWithJwk);
+            config.get("issuer").asString().ifPresent(this::issuer);
+            config.get("audience").asString().ifPresent(this::audience);
 
-            config.get("redirect").asOptionalBoolean().ifPresent(this::redirect);
+            config.get("redirect").asBoolean().ifPresent(this::redirect);
 
             return this;
         }
@@ -892,7 +894,7 @@ public final class OidcConfig {
          * @return udpated builder instance
          */
         public Builder oidcMetadata(Resource resource) {
-            this.oidcMetadata = Json.createReader(resource.getStream()).readObject();
+            this.oidcMetadata = Json.createReader(resource.stream()).readObject();
             return this;
         }
 

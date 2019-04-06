@@ -22,6 +22,7 @@ import java.nio.file.Path;
 import java.util.IdentityHashMap;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Optional;
 import java.util.ServiceLoader;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
@@ -37,6 +38,8 @@ import javax.ws.rs.core.Application;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.ext.ExceptionMapper;
 
+import io.helidon.common.OptionalHelper;
+import io.helidon.common.http.Http;
 import io.helidon.config.Config;
 import io.helidon.microprofile.config.MpConfig;
 import io.helidon.microprofile.server.spi.MpService;
@@ -90,6 +93,17 @@ public class ServerImpl implements Server {
                 .port(builder.getPort())
                 .bindAddress(listenHost);
 
+        OptionalHelper.from(Optional.ofNullable(builder.basePath()))
+                .or(() -> config.get("server.base-path").asString().asOptional())
+                .asOptional()
+                .ifPresent(basePath -> {
+                    routingBuilder.any("/", (req, res) -> {
+                        res.status(Http.Status.MOVED_PERMANENTLY_301);
+                        res.headers().put(Http.Header.LOCATION, basePath);
+                        res.send();
+                    });
+                });
+
         STARTUP_LOGGER.finest("Builders ready");
 
         List<JaxRsApplication> applications = builder.getApplications();
@@ -116,14 +130,14 @@ public class ServerImpl implements Server {
         serverConfig.get("static.classpath").ifExists(cpConfig -> {
             Config context = cpConfig.get("context");
 
-            StaticContentSupport.Builder cpBuilder = StaticContentSupport.builder(cpConfig.get("location").asString());
+            StaticContentSupport.Builder cpBuilder = StaticContentSupport.builder(cpConfig.get("location").asString().get());
             cpBuilder.welcomeFileName(cpConfig.get("welcome")
-                                              .value()
+                                              .asString()
                                               .orElse("index.html"));
             StaticContentSupport staticContent = cpBuilder.build();
 
             if (context.exists()) {
-                routingBuilder.register(context.asString(), staticContent);
+                routingBuilder.register(context.asString().get(), staticContent);
             } else {
                 routingBuilder.register(staticContent);
             }
@@ -133,14 +147,14 @@ public class ServerImpl implements Server {
 
         serverConfig.get("static.path").ifExists(pathConfig -> {
             Config context = pathConfig.get("context");
-            StaticContentSupport.Builder pBuilder = StaticContentSupport.builder(pathConfig.get("location").as(Path.class));
+            StaticContentSupport.Builder pBuilder = StaticContentSupport.builder(pathConfig.get("location").as(Path.class).get());
             pathConfig.get("welcome")
-                    .value()
+                    .asString()
                     .ifPresent(pBuilder::welcomeFileName);
             StaticContentSupport staticContent = pBuilder.build();
 
             if (context.exists()) {
-                routingBuilder.register(context.asString(), staticContent);
+                routingBuilder.register(context.asString().get(), staticContent);
             } else {
                 routingBuilder.register(staticContent);
             }

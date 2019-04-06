@@ -16,10 +16,15 @@
 
 package io.helidon.microprofile.security;
 
+import java.util.concurrent.CompletableFuture;
+import java.util.logging.Logger;
+
 import io.helidon.config.Config;
 import io.helidon.microprofile.server.spi.MpService;
 import io.helidon.microprofile.server.spi.MpServiceContext;
+import io.helidon.security.AuthenticationResponse;
 import io.helidon.security.Security;
+import io.helidon.security.abac.AbacProvider;
 import io.helidon.security.jersey.SecurityFeature;
 import io.helidon.security.webserver.WebSecurity;
 
@@ -31,24 +36,39 @@ import io.helidon.security.webserver.WebSecurity;
  * configuration for helidon config).
  */
 public class SecurityMpService implements MpService {
+    private static final Logger LOGGER = Logger.getLogger(SecurityMpService.class.getName());
+
     @Override
     public void configure(MpServiceContext context) {
         //this uses helidon config heavily
         Config config = context.getHelidonConfig();
 
-        Security security = Security.fromConfig(config);
+        Security security;
+        if (config.get("security.providers").exists()) {
+            security = Security.fromConfig(config);
+        } else {
+            LOGGER.info(
+                    "Security extension for microprofile is enabled, yet security configuration is missing from config "
+                            + "(requires providers configuration at key security.providers). Security will not have any valid "
+                            + "provider.");
+            security = Security.builder()
+                    .addProvider(AbacProvider.create())
+                    .addAuthenticationProvider(providerRequest -> CompletableFuture
+                            .completedFuture(AuthenticationResponse.failed("No provider configured")))
+                    .build();
+        }
 
         Config jerseyConfig = config.get("security.jersey");
-        if (jerseyConfig.get("enabled").asBoolean(true)) {
+        if (jerseyConfig.get("enabled").asBoolean().orElse(true)) {
             SecurityFeature feature = SecurityFeature.builder(security)
-                    .fromConfig(config)
+                    .fromConfig(jerseyConfig)
                     .build();
 
             context.getApplications().forEach(app -> app.register(feature));
         }
 
         Config webServerConfig = config.get("security.web-server");
-        if (webServerConfig.exists() && webServerConfig.get("enabled").asBoolean(true)) {
+        if (webServerConfig.exists() && webServerConfig.get("enabled").asBoolean().orElse(true)) {
             context.getServerRoutingBuilder()
                     .register(WebSecurity.from(security, config));
         }

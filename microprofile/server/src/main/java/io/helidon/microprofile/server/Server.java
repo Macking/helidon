@@ -28,12 +28,15 @@ import java.util.concurrent.ExecutorService;
 import java.util.function.Supplier;
 import java.util.logging.Logger;
 
+import javax.enterprise.context.ApplicationScoped;
+import javax.enterprise.context.RequestScoped;
 import javax.enterprise.inject.se.SeContainer;
 import javax.enterprise.inject.se.SeContainerInitializer;
 import javax.enterprise.inject.spi.CDI;
 import javax.ws.rs.core.Application;
 
 import io.helidon.common.CollectionsHelper;
+import io.helidon.common.configurable.ThreadPoolSupplier;
 import io.helidon.microprofile.config.MpConfig;
 import io.helidon.microprofile.server.spi.MpService;
 
@@ -149,6 +152,7 @@ public interface Server {
         private SeContainer cdiContainer;
         private MpConfig config;
         private String host;
+        private String basePath;
         private int port = -1;
         private boolean containerCreated;
         private Supplier<? extends ExecutorService> defaultExecutorService;
@@ -183,7 +187,7 @@ public interface Server {
             }
 
             if (null == defaultExecutorService) {
-                defaultExecutorService = ThreadPoolSupplier.from(config.getConfig());
+                defaultExecutorService = ThreadPoolSupplier.create(config.getConfig().get("server.executor-service"));
             }
 
             STARTUP_LOGGER.finest("Configuration obtained");
@@ -209,6 +213,8 @@ public interface Server {
                 if (null != resourceConfig) {
                     applications.add(JaxRsApplication.create(resourceConfig));
                 }
+            } else if (!resourceClasses.isEmpty()) {
+                applications.add(JaxRsApplication.create(configForResourceClasses(resourceClasses)));
             }
 
             STARTUP_LOGGER.finest("Jersey resource configuration");
@@ -272,13 +278,33 @@ public interface Server {
             Map<String, Object> props = new HashMap<>(config.getConfig()
                                                               .get("cdi")
                                                               .detach()
-                                                              .asOptionalMap()
+                                                              .asMap()
                                                               .orElse(CollectionsHelper.mapOf()));
             initializer.setProperties(props);
+
+            // add resource classes explicitly configured without CDI annotations
+            this.resourceClasses.stream()
+                    .filter(this::notACdiBean)
+                    .forEach(initializer::addBeanClasses);
+
             STARTUP_LOGGER.finest("Initializer");
             SeContainer container = initializer.initialize();
             STARTUP_LOGGER.finest("Initalizer.initialize()");
             return container;
+        }
+
+        private boolean notACdiBean(Class<?> clazz) {
+            if (clazz.getAnnotation(RequestScoped.class) != null) {
+                // CDI bean
+                return false;
+            }
+
+            if (clazz.getAnnotation(ApplicationScoped.class) != null) {
+                //CDI bean
+                return false;
+            }
+
+            return true;
         }
 
         /**
@@ -289,6 +315,21 @@ public interface Server {
          */
         public Builder host(String host) {
             this.host = host;
+            return this;
+        }
+
+        /**
+         * Configure a path to which the server would redirect when a root path is requested.
+         * E.g. when static content is available at "/static" and you want to start there on index.html,
+         * you may want to configure this to "/static/index.html".
+         * When user requests "http://host:port" or "http://host:port/", the user would be redirected to
+         * "http://host:port/static/index.html"
+         *
+         * @param basePath path to redirect user from root path
+         * @return updated builder instance
+         */
+        public Builder basePath(String basePath) {
+            this.basePath = basePath;
             return this;
         }
 
@@ -525,6 +566,10 @@ public interface Server {
 
         ExecutorService getDefaultExecutorService() {
             return defaultExecutorService.get();
+        }
+
+        String basePath() {
+            return basePath;
         }
     }
 }
